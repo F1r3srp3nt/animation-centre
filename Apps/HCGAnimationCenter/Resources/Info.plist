@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>CFBundleDevelopmentRegion</key><string>en</string>
+	<key>CFBundleExecutable</key><string>HCGAnimationCenter</string>
+	<key>CFBundleIdentifier</key><string>com.hakmicapitalgroup.animationcenter.mac</string>
+	<key>CFBundleInfoDictionaryVersion</key><string>6.0</string>
+	<key>CFBundleName</key><string>HCG Animation Center</string>
+	<key>CFBundleDisplayName</key><string>HCG Animation Center</string>
+	<key>CFBundlePackageType</key><string>APPL</string>
+	<key>CFBundleShortVersionString</key><string>__VERSION__</string>
+	<key>CFBundleVersion</key><string>__BUILD__</string>
+	<key>CFBundleIconFile</key><string>AppIcon</string>
+	<key>LSMinimumSystemVersion</key><string>14.0</string>
+	<key>LSApplicationCategoryType</key><string>public.app-category.graphics-design</string>
+	<key>NSHighResolutionCapable</key><true/>
+	<key>NSSupportsAutomaticTermination</key><false/>
+	<key>NSSupportsSuddenTermination</key><false/>
+	<key>NSHumanReadableCopyright</key><string>© 2026 Hakmi Capital Group</string>
+	<key>HCGGitCommit</key><string>__COMMIT__</string>
+	<key>UTExportedTypeDeclarations</key>
+	<array>
+		<dict>
+			<key>UTTypeIdentifier</key><string>com.hakmicapitalgroup.animation-pack</string>
+			<key>UTTypeDescription</key><string>HCG Animation Pack</string>
+			<key>UTTypeConformsTo</key><array><string>com.apple.package</string><string>public.directory</string></array>
+			<key>UTTypeTagSpecification</key><dict><key>public.filename-extension</key><array><string>hcgpack</string></array></dict>
+		</dict>
+	</array>
+	<key>UTImportedTypeDeclarations</key>
+	<array>
+		<dict>
+			<key>UTTypeIdentifier</key><string>com.hakmicapitalgroup.background-preset</string>
+			<key>UTTypeDescription</key><string>HCG Background Preset</string>
+			<key>UTTypeConformsTo</key><array><string>com.apple.package</string><string>public.directory</string></array>
+			<key>UTTypeTagSpecification</key><dict><key>public.filename-extension</key><array><string>hcgbackground</string></array></dict>
+		</dict>
+	</array>
+	<key>CFBundleDocumentTypes</key>
+	<array>
+		<dict>
+			<key>CFBundleTypeName</key><string>HCG Animation Pack</string>
+			<key>CFBundleTypeRole</key><string>Viewer</string>
+			<key>LSHandlerRank</key><string>Owner</string>
+			<key>LSItemContentTypes</key><array><string>com.hakmicapitalgroup.animation-pack</string></array>
+			<key>LSTypeIsPackage</key><true/>
+		</dict>
+	</array>
+</dict>
+</plist>

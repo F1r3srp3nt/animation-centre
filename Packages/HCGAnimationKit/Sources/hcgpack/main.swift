@@ -17,6 +17,7 @@
 //    hcgpack export-preset <pack> <placement> <output-directory>
 //    hcgpack catalog --pack <pack> --base-url "<url or empty>" [--title T] [--summary S] [--updated ISO] --out catalog.json
 //    hcgpack validate-catalog <catalog.json>
+//    hcgpack compatibility            (the platform × placement table, Markdown)
 //
 
 import Foundation
@@ -214,6 +215,9 @@ do {
             print("\(i.name)  [\(i.id)]  \(i.totalBytes) bytes  poster \(i.poster ?? "-")  baseURL \"\(i.baseURL)\"\(i.isHosted ? "" : "  (NOT HOSTED YET)")")
         }
         print("OK: \(c.items.count) item(s)")
+
+    case "compatibility":
+        print(PlatformSupport.markdownTable())
 
     default:
         fail("unknown command \(command)")
