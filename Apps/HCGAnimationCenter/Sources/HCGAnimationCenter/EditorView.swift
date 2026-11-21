@@ -260,37 +260,40 @@ struct PackEditor: View {
 
     @ViewBuilder
     private func header(_ item: LibraryItem) -> some View {
-        HStack(spacing: 14) {
-            VStack(alignment: .leading, spacing: 4) {
-                TextField("Name", text: Binding(get: { item.pack.name }, set: { n in model.editPack { $0.name = String(n.prefix(120)) } }))
-                    .textFieldStyle(.plain).font(.system(size: 20, weight: .semibold)).foregroundStyle(HCG.text)
-                Text("\(item.pack.media.file) · \(Int(item.pack.media.width))×\(Int(item.pack.media.height)) · \(item.pack.media.codec ?? "video") · \(formatSeconds(item.pack.media.duration)) · muted")
-                    .font(.system(size: 11)).foregroundStyle(HCG.textMuted)
-            }
-            Spacer()
-            Picker("Placement", selection: $model.placement) {
-                ForEach(PlacementID.allCases) { Text($0.title).tag($0) }
-            }
-            .pickerStyle(.segmented).labelsHidden().frame(width: 430)
+        VStack(alignment: .leading, spacing: 4) {
+            TextField("Name", text: Binding(get: { item.pack.name }, set: { n in model.editPack { $0.name = String(n.prefix(120)) } }))
+                .textFieldStyle(.plain).font(.system(size: 20, weight: .semibold)).foregroundStyle(HCG.text)
+            Text("\(item.pack.media.file) · \(Int(item.pack.media.width))×\(Int(item.pack.media.height)) · \(item.pack.media.codec ?? "video") · \(formatSeconds(item.pack.media.duration)) · muted")
+                .font(.system(size: 11)).foregroundStyle(HCG.textMuted).lineLimit(1).truncationMode(.middle)
         }
-        HStack(spacing: 12) {
-            Button {
-                model.applySelectedToDesktop()
-            } label: {
-                Label("Apply to Desktop", systemImage: "display").font(.system(size: 14, weight: .semibold)).padding(.horizontal, 6)
-            }
-            .buttonStyle(PrimaryButtonStyle())
-            .keyboardShortcut(.return, modifiers: [.command])
-            .help("Plays this pack's Desktop placement behind your desktop icons on every display (⌘↩)")
-            if model.desktop.status.isActive {
-                Button("Stop Desktop") { model.stopDesktop() }.buttonStyle(SecondaryButtonStyle())
-            }
-            StatusPill(text: model.desktop.status.label, color: model.desktop.status.colour)
-            Spacer()
-            if model.placement != .desktop {
-                Text("Apply to Desktop always uses the Desktop placement.").font(.system(size: 11)).foregroundStyle(HCG.textMuted)
-            }
+        .frame(maxWidth: .infinity, alignment: .leading)
+        Picker("Placement", selection: $model.placement) {
+            ForEach(PlacementID.allCases) { Text($0.title).tag($0) }
         }
+        .pickerStyle(.segmented).labelsHidden().frame(maxWidth: 520)
+        ViewThatFits(in: .horizontal) {
+            HStack(spacing: 12) { applyButtons }
+            VStack(alignment: .leading, spacing: 8) { applyButtons }
+        }
+        if model.placement != .desktop {
+            Text("Apply to Desktop always uses the Desktop placement.").font(.system(size: 11)).foregroundStyle(HCG.textMuted)
+        }
+    }
+
+    @ViewBuilder
+    private var applyButtons: some View {
+        Button {
+            model.applySelectedToDesktop()
+        } label: {
+            Label("Apply to Desktop", systemImage: "display").font(.system(size: 14, weight: .semibold)).lineLimit(1).fixedSize()
+        }
+        .buttonStyle(PrimaryButtonStyle())
+        .keyboardShortcut(.return, modifiers: [.command])
+        .help("Plays this pack's Desktop placement behind your desktop icons on every display (⌘↩)")
+        if model.desktop.status.isActive {
+            Button("Stop Desktop") { model.stopDesktop() }.buttonStyle(SecondaryButtonStyle()).fixedSize()
+        }
+        StatusPill(text: model.desktop.status.label, color: model.desktop.status.colour).fixedSize()
     }
 
     private func canvasAspect(_ placement: Placement) -> CGFloat {

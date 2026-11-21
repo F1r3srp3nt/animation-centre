@@ -1,0 +1,224 @@
+{
+  "app": "0.1.0",
+  "checks": [
+    {
+      "detail": "HCG Orbital Command, 4 placements, 3.6 MB",
+      "name": "Sample pack seeded into the library",
+      "simulated": false,
+      "status": "pass"
+    },
+    {
+      "detail": "media 32307504e32b…",
+      "name": "Sample pack checksums",
+      "simulated": false,
+      "status": "pass"
+    },
+    {
+      "detail": "3840x2160 12.00 s avc1",
+      "name": "4K clip probed with AVFoundation",
+      "simulated": false,
+      "status": "pass"
+    },
+    {
+      "detail": "media.mp4 3840x2160 12.00 s origin video, poster 587381 bytes, 4 placements, muted",
+      "name": "Import MP4",
+      "simulated": false,
+      "status": "pass"
+    },
+    {
+      "detail": "media.mov 3840x2160 12.00 s origin video, poster 587381 bytes, 4 placements, muted",
+      "name": "Import MOV",
+      "simulated": false,
+      "status": "pass"
+    },
+    {
+      "detail": "media.mov 320x180 1.20 s origin gif, poster 5172 bytes, 4 placements, muted",
+      "name": "Import GIF (converted to H.264)",
+      "simulated": false,
+      "status": "pass"
+    },
+    {
+      "detail": "media.mp4 could not be read as a video (Cannot Open).",
+      "name": "Damaged file refused",
+      "simulated": false,
+      "status": "pass"
+    },
+    {
+      "detail": "fill at 1.0×: Playing, time 0.00→0.83, layout 552x311 (C core 552x311)",
+      "name": "Placement Desktop renders",
+      "simulated": false,
+      "status": "pass"
+    },
+    {
+      "detail": "crop at 1.0×: Playing, time 0.00→0.84, layout 855x481 (C core 855x481)",
+      "name": "Placement App Background renders",
+      "simulated": false,
+      "status": "pass"
+    },
+    {
+      "detail": "crop at 0.75×: Playing, time 0.00→0.80, layout 552x310 (C core 552x310)",
+      "name": "Placement Banner renders",
+      "simulated": false,
+      "status": "pass"
+    },
+    {
+      "detail": "fit at 1.5×: Playing, time 0.00→1.45, layout 222x124 (C core 222x124)",
+      "name": "Placement Loading Screen renders",
+      "simulated": false,
+      "status": "pass"
+    },
+    {
+      "detail": "trim 0–1 s at 2×: Finished (holding last frame)",
+      "name": "Play once holds the last frame",
+      "simulated": false,
+      "status": "pass"
+    },
+    {
+      "detail": "Still frame — playback unavailable: simulated",
+      "name": "Unplayable video shows the still",
+      "simulated": true,
+      "status": "pass"
+    },
+    {
+      "detail": "1 window(s) for 1 display(s): display 1: 1024x768 level -2147483623 visible true player Playing",
+      "name": "Apply to Desktop plays on every display",
+      "simulated": false,
+      "status": "pass"
+    },
+    {
+      "detail": "level -2147483623",
+      "name": "Desktop windows cover each display at desktop level, ignore the mouse, join all Spaces",
+      "simulated": false,
+      "status": "pass"
+    },
+    {
+      "detail": "1 on-screen window(s) at the desktop level",
+      "name": "Window server shows the desktop windows on screen",
+      "simulated": false,
+      "status": "pass"
+    },
+    {
+      "detail": "times [\"0.80\"]",
+      "name": "Desktop video advances",
+      "simulated": false,
+      "status": "pass"
+    },
+    {
+      "detail": "20.5% of pixels differ from the normal desktop; 18.10% change between frames 1 s apart",
+      "name": "Animation visible on the desktop (screenshots)",
+      "simulated": false,
+      "status": "pass"
+    },
+    {
+      "detail": "paused true, resumed true",
+      "name": "Pause and resume (menu bar commands)",
+      "simulated": false,
+      "status": "pass"
+    },
+    {
+      "detail": "added → true, removed+resized → true, back to real displays → true",
+      "name": "Display added, removed and resized",
+      "simulated": true,
+      "status": "pass"
+    },
+    {
+      "detail": "paused true, released true, resumed true, advancing true",
+      "name": "Sleep pauses, frees decoders after 8 s; wake resumes",
+      "simulated": true,
+      "status": "pass"
+    },
+    {
+      "detail": "Playing on the desktop",
+      "name": "Displays asleep and screen lock pause and resume",
+      "simulated": true,
+      "status": "pass"
+    },
+    {
+      "detail": "reduceMotion true, lowPower true, lowPower→normal desktop true, thermal true, back to playing true",
+      "name": "Still-frame fallback: Reduce Motion, Low Power (still / normal desktop), heat",
+      "simulated": true,
+      "status": "pass"
+    },
+    {
+      "detail": "0 on-screen desktop windows left",
+      "name": "Stop closes every desktop window",
+      "simulated": false,
+      "status": "pass"
+    },
+    {
+      "detail": "/System/Library/Desktop Pictures/Solid Colors/Black.png",
+      "name": "System wallpaper never modified",
+      "simulated": false,
+      "status": "pass"
+    },
+    {
+      "detail": "0.00% of pixels differ",
+      "name": "Normal desktop restored (screenshot matches the one before Apply)",
+      "simulated": false,
+      "status": "pass"
+    },
+    {
+      "detail": "played every time true, stopped every time true, windows left 0, window objects alive 0/20, memory 296 → 83 MB",
+      "name": "Repeated apply/stop ×20",
+      "simulated": false,
+      "status": "pass"
+    },
+    {
+      "detail": "",
+      "name": "System wallpaper still unchanged after repeated apply/stop",
+      "simulated": false,
+      "status": "pass"
+    },
+    {
+      "detail": "enabled+playing → continueInMenuBar, disabled+playing → stopAndQuit, nothing playing → stopAndQuit",
+      "name": "Editor close: keeps playing only when enabled",
+      "simulated": false,
+      "status": "pass"
+    },
+    {
+      "detail": "HCG Orbital Command, 3.6 MB, poster poster.jpg",
+      "name": "Catalog loads (poster, size)",
+      "simulated": false,
+      "status": "pass"
+    },
+    {
+      "detail": "4F1C9A3E-2B7D-4E61-9C05-0D8A7B3E5F21-a8b25c69e92b1cdb.hcgpack",
+      "name": "Catalog download verified and cached for offline use",
+      "simulated": false,
+      "status": "pass"
+    },
+    {
+      "detail": "321060 bytes",
+      "name": "Catalog poster loads",
+      "simulated": false,
+      "status": "pass"
+    },
+    {
+      "detail": "error: A server with the specified hostname could not be found.",
+      "name": "Failed refresh keeps the previous catalog",
+      "simulated": false,
+      "status": "pass"
+    },
+    {
+      "detail": "The catalog must be served over HTTPS (got http).",
+      "name": "Plain HTTP catalog refused",
+      "simulated": false,
+      "status": "pass"
+    }
+  ],
+  "environment": {
+    "architecture": "arm64",
+    "cpu": "Apple M1 (Virtual)",
+    "displays": "1024x768@1x",
+    "lowPowerMode": "false",
+    "macOS": "Version 26.7.2 (Build 25G332)",
+    "model": "VirtualMac2,1",
+    "reduceMotion": "false",
+    "virtualMachine": "yes"
+  },
+  "summary": {
+    "failed": 0,
+    "passed": 34,
+    "skipped": 0
+  }
+}

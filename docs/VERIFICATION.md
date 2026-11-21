@@ -13,8 +13,10 @@ No Mac was attached to the build session, so **nothing ran on physical macOS har
 Real sleep/wake, real display hot-plug, real Low Power Mode and the energy cost of 4K playback are therefore
 unverified until the hardware checklist is done.
 
-Reference run: CI run 5, commit `079f1b5` — all three jobs green:
-<https://github.com/F1r3srp3nt/animation-centre/actions/runs/44864892593>. Later commits re-run the same jobs.
+Reference runs (all three jobs green): run 5, commit `079f1b5`
+<https://github.com/F1r3srp3nt/animation-centre/actions/runs/44864892593>, and run 7, commit `246b238`
+<https://github.com/F1r3srp3nt/animation-centre/actions/runs/44866380880> (self-test again 34/34:
+[evidence/ci-self-test-run7.json](evidence/ci-self-test-run7.json)). Every push re-runs the same jobs.
 
 ## Mac app (job `macos`)
 
@@ -50,6 +52,12 @@ behind menu bar and Dock → app quit → normal desktop. Thresholds checked by 
 
 Reduce Motion, for real: the Maker job's runner had **Reduce Motion on** at the system level; the demo showed the still
 with reason "Reduce Motion" (below). The macOS job's runner reported it off.
+
+The editor on the runner's 1024×768 screen (sample in the library, Desktop preview playing, trim timeline, applied to
+the desktop behind it). This screenshot exposed two fixes made afterwards: the sample is now seeded once per library
+folder, and the header wraps on narrow windows.
+
+![editor](evidence/ci-editor-1024px.jpg)
 
 ## Maker-built demo (job `maker-demo`)
 
