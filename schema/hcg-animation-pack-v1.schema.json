@@ -1,0 +1,84 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "com.hakmicapitalgroup.animation-pack/1",
+  "title": "HCG animation pack, format version 1 (pack.json)",
+  "description": "One source clip, its poster/stills and one placement per surface. Each placement embeds a complete HCG background preset v1 (hcg-background-preset-v1.schema.json) that names the pack's media file. File names are plain names inside the pack folder; every file carries its size and SHA-256. Readers refuse a higher formatVersion, ignore unknown keys and unknown placements.",
+  "type": "object",
+  "required": ["format", "formatVersion", "media", "placements"],
+  "properties": {
+    "format": { "const": "com.hakmicapitalgroup.animation-pack" },
+    "formatVersion": { "const": 1 },
+    "id": { "$ref": "#/$defs/uuid" },
+    "name": { "type": "string", "maxLength": 120 },
+    "created": { "type": "string", "format": "date-time" },
+    "generator": { "type": "object", "description": "Informational. Never trusted for decisions." },
+    "presetFormat": {
+      "type": "object",
+      "description": "Informational: the preset format embedded in each placement.",
+      "properties": {
+        "format": { "const": "com.hakmicapitalgroup.background-preset" },
+        "formatVersion": { "type": "integer" }
+      }
+    },
+    "media": {
+      "allOf": [
+        { "$ref": "#/$defs/file" },
+        {
+          "type": "object",
+          "required": ["width", "height", "duration"],
+          "properties": {
+            "width": { "type": "number", "minimum": 16, "maximum": 8192 },
+            "height": { "type": "number", "minimum": 16, "maximum": 8192 },
+            "duration": { "type": "number", "exclusiveMinimum": 0, "maximum": 600 },
+            "origin": { "enum": ["video", "gif", "ai"] },
+            "codec": { "type": "string" }
+          }
+        }
+      ]
+    },
+    "files": { "type": "array", "items": { "$ref": "#/$defs/file" } },
+    "defaultPlacement": { "type": "string" },
+    "placements": {
+      "type": "object",
+      "minProperties": 1,
+      "properties": {
+        "desktop": { "$ref": "#/$defs/placement" },
+        "app-background": { "$ref": "#/$defs/placement" },
+        "banner": { "$ref": "#/$defs/placement" },
+        "loading-screen": { "$ref": "#/$defs/placement" }
+      }
+    }
+  },
+  "$defs": {
+    "uuid": { "type": "string", "pattern": "^[0-9A-Fa-f]{8}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{12}$" },
+    "fileName": {
+      "type": "string", "minLength": 1, "maxLength": 255, "pattern": "^[^./\\\\:][^/\\\\:]*$",
+      "not": { "enum": ["pack.json", "preset.json"] }
+    },
+    "file": {
+      "type": "object",
+      "required": ["file", "bytes", "sha256"],
+      "properties": {
+        "file": { "$ref": "#/$defs/fileName" },
+        "bytes": { "type": "integer", "minimum": 0 },
+        "sha256": { "type": "string", "pattern": "^[0-9a-f]{64}$" },
+        "role": { "type": "string", "description": "media | poster | still (informational)" }
+      }
+    },
+    "placement": {
+      "type": "object",
+      "required": ["preset"],
+      "properties": {
+        "canvas": {
+          "type": "object",
+          "description": "The aspect the author previewed at (informational).",
+          "required": ["width", "height"],
+          "properties": { "width": { "type": "number", "exclusiveMinimum": 0 }, "height": { "type": "number", "exclusiveMinimum": 0 } }
+        },
+        "reduceMotion": { "enum": ["still", "play"], "default": "still" },
+        "lowPower": { "enum": ["still", "play", "system"], "default": "still" },
+        "preset": { "$ref": "../com.hakmicapitalgroup.background-preset/1", "description": "A complete HCG background preset v1 (hcg-background-preset-v1.schema.json)" }
+      }
+    }
+  }
+}

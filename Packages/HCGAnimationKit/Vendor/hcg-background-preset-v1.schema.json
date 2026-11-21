@@ -1,0 +1,69 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "com.hakmicapitalgroup.background-preset/1",
+  "title": "HCG background preset, format version 1",
+  "description": "An animated background: one video file, how to trim, scale, loop and play it, and a still fallback. Data only. File names are plain names inside the preset's own folder. Readers refuse a higher formatVersion and ignore unknown keys.",
+  "type": "object",
+  "required": ["format", "formatVersion", "media"],
+  "properties": {
+    "format": { "const": "com.hakmicapitalgroup.background-preset" },
+    "formatVersion": { "const": 1 },
+    "id": { "type": "string", "pattern": "^[0-9A-Fa-f]{8}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{12}$" },
+    "name": { "type": "string", "maxLength": 120 },
+    "created": { "type": "string", "format": "date-time" },
+    "media": {
+      "type": "object",
+      "required": ["file", "width", "height", "duration"],
+      "properties": {
+        "kind": { "const": "video" },
+        "file": { "$ref": "#/$defs/fileName" },
+        "width": { "type": "number", "minimum": 16, "maximum": 8192 },
+        "height": { "type": "number", "minimum": 16, "maximum": 8192 },
+        "duration": { "type": "number", "exclusiveMinimum": 0, "maximum": 600 },
+        "origin": { "enum": ["video", "gif", "ai"] },
+        "sha256": { "type": "string", "pattern": "^[0-9a-f]{64}$" }
+      }
+    },
+    "still": {
+      "type": "object",
+      "properties": {
+        "file": { "$ref": "#/$defs/fileName" },
+        "time": { "type": "number", "minimum": 0 }
+      }
+    },
+    "playback": {
+      "type": "object",
+      "properties": {
+        "trimStart": { "type": "number", "minimum": 0 },
+        "trimEnd": { "type": "number", "description": "0 or less means the end of the clip" },
+        "loop": { "type": "boolean", "default": true },
+        "speed": { "type": "number", "minimum": 0.25, "maximum": 2.0, "default": 1.0 },
+        "muted": { "const": true, "description": "Version 1 never plays sound; false is read as true with a warning." }
+      }
+    },
+    "layout": {
+      "type": "object",
+      "properties": {
+        "scaling": { "enum": ["fill", "fit", "crop"], "default": "fill" },
+        "crop": {
+          "type": "object",
+          "description": "Normalised to the media's display frame, origin top-left; used by crop.",
+          "properties": {
+            "x": { "type": "number", "minimum": 0, "maximum": 1 },
+            "y": { "type": "number", "minimum": 0, "maximum": 1 },
+            "width": { "type": "number", "minimum": 0.1, "maximum": 1 },
+            "height": { "type": "number", "minimum": 0.1, "maximum": 1 }
+          }
+        },
+        "backgroundColor": { "type": "string", "pattern": "^#[0-9A-Fa-f]{6}$", "default": "#000000" }
+      }
+    },
+    "generator": {
+      "type": "object",
+      "description": "Informational: how the media was made (import, ai). Never executed or trusted for access decisions."
+    }
+  },
+  "$defs": {
+    "fileName": { "type": "string", "minLength": 1, "maxLength": 255, "pattern": "^[^./\\\\:][^/\\\\:]*$" }
+  }
+}

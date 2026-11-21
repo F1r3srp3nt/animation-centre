@@ -1,0 +1,41 @@
+{
+  "created": "2026-11-21T00:00:00Z",
+  "format": "com.hakmicapitalgroup.background-preset",
+  "formatVersion": 1,
+  "generator": {
+    "kind": "import",
+    "source": "video"
+  },
+  "id": "D7535958-022C-545E-84D2-E102D7E6C285",
+  "layout": {
+    "backgroundColor": "#000000",
+    "crop": {
+      "height": 1,
+      "width": 1,
+      "x": 0,
+      "y": 0
+    },
+    "scaling": "fill"
+  },
+  "media": {
+    "duration": 12,
+    "file": "media.mp4",
+    "height": 2160,
+    "kind": "video",
+    "origin": "video",
+    "sha256": "32307504e32bd4263f2e86cbbd472c30f781b3cdeccc3d5daba812fb4649650b",
+    "width": 3840
+  },
+  "name": "HCG Orbital Command — Desktop",
+  "playback": {
+    "loop": true,
+    "muted": true,
+    "speed": 1,
+    "trimEnd": 12,
+    "trimStart": 0
+  },
+  "still": {
+    "file": "poster.jpg",
+    "time": 2
+  }
+}

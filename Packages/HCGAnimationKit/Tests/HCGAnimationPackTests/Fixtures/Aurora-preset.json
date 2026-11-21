@@ -1,0 +1,23 @@
+{
+  "format": "com.hakmicapitalgroup.background-preset",
+  "formatVersion": 1,
+  "id": "6F0B2C1E-4A55-4C8B-9E1D-2B7F1A3C9D40",
+  "name": "Aurora",
+  "created": "2026-11-18T12:00:00Z",
+  "media": {
+    "kind": "video",
+    "file": "media.mov",
+    "width": 1080,
+    "height": 1920,
+    "duration": 12.0,
+    "origin": "video"
+  },
+  "still": { "file": "still.jpg", "time": 1.5 },
+  "playback": { "trimStart": 1.5, "trimEnd": 9.5, "loop": true, "speed": 0.75, "muted": true },
+  "layout": {
+    "scaling": "crop",
+    "crop": { "x": 0.1, "y": 0.05, "width": 0.8, "height": 0.8 },
+    "backgroundColor": "#000000"
+  },
+  "generator": { "kind": "import", "source": "video" }
+}

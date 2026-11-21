@@ -1,0 +1,41 @@
+{
+  "format": "com.hakmicapitalgroup.animation-catalog",
+  "formatVersion": 1,
+  "items": [
+    {
+      "baseURL": "",
+      "files": [
+        {
+          "bytes": 5905,
+          "file": "pack.json",
+          "role": "manifest",
+          "sha256": "a8b25c69e92b1cdba22e68905a966516c27b53a29c732ef24ae090dcba0427aa"
+        },
+        {
+          "bytes": 3319168,
+          "file": "media.mp4",
+          "role": "media",
+          "sha256": "32307504e32bd4263f2e86cbbd472c30f781b3cdeccc3d5daba812fb4649650b"
+        },
+        {
+          "bytes": 321060,
+          "file": "poster.jpg",
+          "role": "poster",
+          "sha256": "ddd916c35e70b9660826260b7e0594b0039a9d0d1e7c6ede04ef6b3457398593"
+        }
+      ],
+      "id": "4F1C9A3E-2B7D-4E61-9C05-0D8A7B3E5F21",
+      "media": {
+        "duration": 12,
+        "height": 2160,
+        "width": 3840
+      },
+      "name": "HCG Orbital Command",
+      "packFormatVersion": 1,
+      "poster": "poster.jpg",
+      "summary": "Orbital command centre loop in HCG cyan. 4K, silent, seamless 12-second loop."
+    }
+  ],
+  "title": "HCG Animation Catalog",
+  "updated": "2026-11-21T00:00:00Z"
+}

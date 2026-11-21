@@ -1,0 +1,232 @@
+{
+  "created": "2026-11-21T00:00:00Z",
+  "defaultPlacement": "desktop",
+  "files": [
+    {
+      "bytes": 321060,
+      "file": "poster.jpg",
+      "role": "poster",
+      "sha256": "ddd916c35e70b9660826260b7e0594b0039a9d0d1e7c6ede04ef6b3457398593"
+    }
+  ],
+  "format": "com.hakmicapitalgroup.animation-pack",
+  "formatVersion": 1,
+  "generator": {
+    "app": "hcgpack",
+    "version": "0.1.0"
+  },
+  "id": "4F1C9A3E-2B7D-4E61-9C05-0D8A7B3E5F21",
+  "media": {
+    "bytes": 3319168,
+    "codec": "avc1",
+    "duration": 12,
+    "file": "media.mp4",
+    "height": 2160,
+    "origin": "video",
+    "sha256": "32307504e32bd4263f2e86cbbd472c30f781b3cdeccc3d5daba812fb4649650b",
+    "width": 3840
+  },
+  "name": "HCG Orbital Command",
+  "placements": {
+    "app-background": {
+      "canvas": {
+        "height": 2556,
+        "width": 1179
+      },
+      "lowPower": "still",
+      "preset": {
+        "created": "2026-11-21T00:00:00Z",
+        "format": "com.hakmicapitalgroup.background-preset",
+        "formatVersion": 1,
+        "generator": {
+          "kind": "import",
+          "source": "video"
+        },
+        "id": "EBA12307-4051-5284-A60D-7F4AD22D1A50",
+        "layout": {
+          "backgroundColor": "#000000",
+          "crop": {
+            "height": 1,
+            "width": 0.259463,
+            "x": 0.370268,
+            "y": 0
+          },
+          "scaling": "crop"
+        },
+        "media": {
+          "duration": 12,
+          "file": "media.mp4",
+          "height": 2160,
+          "kind": "video",
+          "origin": "video",
+          "sha256": "32307504e32bd4263f2e86cbbd472c30f781b3cdeccc3d5daba812fb4649650b",
+          "width": 3840
+        },
+        "name": "HCG Orbital Command — App Background",
+        "playback": {
+          "loop": true,
+          "muted": true,
+          "speed": 1,
+          "trimEnd": 12,
+          "trimStart": 0
+        },
+        "still": {
+          "file": "poster.jpg",
+          "time": 2
+        }
+      },
+      "reduceMotion": "still"
+    },
+    "banner": {
+      "canvas": {
+        "height": 500,
+        "width": 1500
+      },
+      "lowPower": "still",
+      "preset": {
+        "created": "2026-11-21T00:00:00Z",
+        "format": "com.hakmicapitalgroup.background-preset",
+        "formatVersion": 1,
+        "generator": {
+          "kind": "import",
+          "source": "video"
+        },
+        "id": "25A8C255-DCA5-54C0-9D2F-98251E2D134A",
+        "layout": {
+          "backgroundColor": "#000000",
+          "crop": {
+            "height": 0.515298,
+            "width": 0.869565,
+            "x": 0.065217,
+            "y": 0.262351
+          },
+          "scaling": "crop"
+        },
+        "media": {
+          "duration": 12,
+          "file": "media.mp4",
+          "height": 2160,
+          "kind": "video",
+          "origin": "video",
+          "sha256": "32307504e32bd4263f2e86cbbd472c30f781b3cdeccc3d5daba812fb4649650b",
+          "width": 3840
+        },
+        "name": "HCG Orbital Command — Banner",
+        "playback": {
+          "loop": true,
+          "muted": true,
+          "speed": 0.75,
+          "trimEnd": 12,
+          "trimStart": 0
+        },
+        "still": {
+          "file": "poster.jpg",
+          "time": 2
+        }
+      },
+      "reduceMotion": "still"
+    },
+    "desktop": {
+      "canvas": {
+        "height": 2234,
+        "width": 3456
+      },
+      "lowPower": "still",
+      "preset": {
+        "created": "2026-11-21T00:00:00Z",
+        "format": "com.hakmicapitalgroup.background-preset",
+        "formatVersion": 1,
+        "generator": {
+          "kind": "import",
+          "source": "video"
+        },
+        "id": "D7535958-022C-545E-84D2-E102D7E6C285",
+        "layout": {
+          "backgroundColor": "#000000",
+          "crop": {
+            "height": 1,
+            "width": 1,
+            "x": 0,
+            "y": 0
+          },
+          "scaling": "fill"
+        },
+        "media": {
+          "duration": 12,
+          "file": "media.mp4",
+          "height": 2160,
+          "kind": "video",
+          "origin": "video",
+          "sha256": "32307504e32bd4263f2e86cbbd472c30f781b3cdeccc3d5daba812fb4649650b",
+          "width": 3840
+        },
+        "name": "HCG Orbital Command — Desktop",
+        "playback": {
+          "loop": true,
+          "muted": true,
+          "speed": 1,
+          "trimEnd": 12,
+          "trimStart": 0
+        },
+        "still": {
+          "file": "poster.jpg",
+          "time": 2
+        }
+      },
+      "reduceMotion": "still"
+    },
+    "loading-screen": {
+      "canvas": {
+        "height": 2556,
+        "width": 1179
+      },
+      "lowPower": "play",
+      "preset": {
+        "created": "2026-11-21T00:00:00Z",
+        "format": "com.hakmicapitalgroup.background-preset",
+        "formatVersion": 1,
+        "generator": {
+          "kind": "import",
+          "source": "video"
+        },
+        "id": "D2CF754D-4B3C-5273-958C-377FB5CA6948",
+        "layout": {
+          "backgroundColor": "#080C12",
+          "crop": {
+            "height": 1,
+            "width": 1,
+            "x": 0,
+            "y": 0
+          },
+          "scaling": "fit"
+        },
+        "media": {
+          "duration": 12,
+          "file": "media.mp4",
+          "height": 2160,
+          "kind": "video",
+          "origin": "video",
+          "sha256": "32307504e32bd4263f2e86cbbd472c30f781b3cdeccc3d5daba812fb4649650b",
+          "width": 3840
+        },
+        "name": "HCG Orbital Command — Loading Screen",
+        "playback": {
+          "loop": true,
+          "muted": true,
+          "speed": 1.5,
+          "trimEnd": 12,
+          "trimStart": 0
+        },
+        "still": {
+          "file": "poster.jpg",
+          "time": 2
+        }
+      },
+      "reduceMotion": "still"
+    }
+  },
+  "presetFormat": {
+    "format": "com.hakmicapitalgroup.background-preset",
+    "formatVersion": 1
+  }
+}
