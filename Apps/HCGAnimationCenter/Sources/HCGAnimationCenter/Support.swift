@@ -82,7 +82,6 @@ enum AppSettings {
         static let appliedPack = "appliedPackID"
         static let catalogURL = "catalogURL"
         static let stillOnly = "stillOnly"
-        static let seeded = "seededSample"
     }
 
     static func register() {

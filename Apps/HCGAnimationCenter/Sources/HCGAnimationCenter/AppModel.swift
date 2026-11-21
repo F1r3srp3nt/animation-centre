@@ -96,9 +96,11 @@ final class AppModel: ObservableObject {
         if selectedID == nil || selected == nil { selectedID = items.first?.id }
     }
 
-    /// First launch: copy the bundled HCG Orbital Command pack into the library.
+    /// First launch of a library: copy the bundled HCG Orbital Command pack into it. The marker lives in the library
+    /// folder itself, so each library is seeded once (and a sample the user deleted stays deleted).
     func seedSampleIfNeeded() {
-        guard !AppSettings.defaults.bool(forKey: AppSettings.Key.seeded), let sample = BundledResources.samplePack,
+        let marker = paths.library.appendingPathComponent(".sample-added")
+        guard !FileManager.default.fileExists(atPath: marker.path), let sample = BundledResources.samplePack,
               let pack = try? AnimationPack.read(contentsOf: sample) else { return }
         let dest = paths.library.appendingPathComponent("\(pack.id).hcgpack", isDirectory: true)
         if !FileManager.default.fileExists(atPath: dest.path) {
@@ -110,7 +112,7 @@ final class AppModel: ObservableObject {
                 return
             }
         }
-        AppSettings.defaults.set(true, forKey: AppSettings.Key.seeded)
+        try? Data("\(pack.id)\n".utf8).write(to: marker)
     }
 
     func addPackFolder(_ source: URL, select: Bool = true) throws {
