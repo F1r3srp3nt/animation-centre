@@ -101,3 +101,104 @@ jobs:
             ${{ github.workspace }}/out/screens
           if-no-files-found: warn
           retention-days: 14
+
+  maker-demo:
+    runs-on: macos-latest
+    timeout-minutes: 75
+    env:
+      # HCG Executable Maker, main at the time of this milestone (unchanged: the demo uses its existing
+      # AppPackaging.json contract and Swift → .app route; no Maker change was needed).
+      MAKER_COMMIT: 2842998e778d687cf7653100c280875df93f8f1a
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          path: animation-centre
+      - uses: actions/checkout@v4
+        with:
+          repository: F1r3srp3nt/HCG-Executable-Maker
+          ref: ${{ env.MAKER_COMMIT }}
+          path: maker
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: "10.0.x"
+      - name: Build HCG Executable Maker and its UI driver (real app views, headless)
+        run: |
+          echo "OUT=$RUNNER_TEMP/maker-out" >> "$GITHUB_ENV"
+          dotnet build maker/tools/ui-driver -c Release
+          dotnet maker/src/HCG.ExecutableMaker.App/bin/Release/net10.0/HCGExecutableMaker.dll --version
+          git -C maker log -1 --format='Maker commit %H %s'
+      - name: Build Samples/MakerDemo THROUGH Maker's New Build wizard (import folder → choose package → evaluate → configure → contract → build)
+        run: >
+          dotnet maker/tools/ui-driver/bin/Release/net10.0/hcg-ui-driver.dll
+          --source "$GITHUB_WORKSPACE/animation-centre" --package Samples/MakerDemo
+          --product HCGPackDemo --name "HCG Pack Demo" --bundle-id com.hakmicapitalgroup.packdemo
+          --arch arm64 --formats app,zip --confirm-contract
+          --output "$OUT" --screenshots "$OUT/screens" --prefix packdemo
+      - name: Maker's own post-build checks of the finished app (signature, Info.plist, slices, launch, screenshot)
+        run: |
+          APP="$(find "$OUT/artifacts" -maxdepth 4 -name '*.app' -type d | head -1)"
+          echo "APP=$APP" >> "$GITHUB_ENV"
+          maker/tools/ui-driver/verify-macos-app.sh "$APP" "$OUT/screens/launch-packdemo.png" arm64
+      - name: The finished app contains the pack, byte for byte, and declares it (project-level opt-in)
+        run: |
+          ls -la "$APP/Contents/Resources/OrbitalCommand.hcgpack"
+          diff -r animation-centre/Samples/OrbitalCommand.hcgpack "$APP/Contents/Resources/OrbitalCommand.hcgpack"
+          echo "identical to Samples/OrbitalCommand.hcgpack"
+          /usr/libexec/PlistBuddy -c 'Print :HCGAnimationPack' -c 'Print :HCGAnimationPlacement' "$APP/Contents/Info.plist"
+          shasum -a 256 "$APP/Contents/Resources/OrbitalCommand.hcgpack/media.mp4"
+          codesign --verify --strict --deep --verbose=2 "$APP"
+      - name: The finished app plays the pack offline and keeps its controls usable
+        run: |
+          set -o pipefail
+          report="$TMPDIR/hcg-pack-demo.txt"
+          run() {
+            rm -f "$report"
+            open -n "$APP" --args --self-check "$@"
+            for _ in $(seq 1 60); do grep -q '^done=1' "$report" 2>/dev/null && break; sleep 1; done
+            cat "$report"
+          }
+          echo "--- normal run"; run | tee "$OUT/demo-run.txt"
+          grep -q '^pack=loaded' "$OUT/demo-run.txt"
+          grep -q '^verify=ok' "$OUT/demo-run.txt"
+          grep -q '^state=Playing' "$OUT/demo-run.txt"
+          grep -q '^advanced=yes' "$OUT/demo-run.txt"
+          grep -q '^videoOnScreen=yes' "$OUT/demo-run.txt"
+          grep -q '^click=Launch Mission .* works=yes' "$OUT/demo-run.txt"
+          grep -q '^toggle=Animate background .* works=yes' "$OUT/demo-run.txt"
+          ! grep -q 'isBackground=true' "$OUT/demo-run.txt"
+          echo "--- playback unavailable → still"; run --simulate-playback-failure | tee "$OUT/demo-run-still.txt"
+          grep -q '^state=Still frame — playback unavailable' "$OUT/demo-run-still.txt"
+          grep -q '^still=yes' "$OUT/demo-run-still.txt"
+          grep -q '^click=Launch Mission .* works=yes' "$OUT/demo-run-still.txt"
+      - name: Offline proof — run with all networking denied by the sandbox
+        run: |
+          rm -f "$TMPDIR/hcg-pack-demo.txt"
+          if command -v sandbox-exec >/dev/null; then
+            exe="$APP/Contents/MacOS/$(/usr/libexec/PlistBuddy -c 'Print :CFBundleExecutable' "$APP/Contents/Info.plist")"
+            sandbox-exec -p '(version 1)(allow default)(deny network*)' "$exe" --self-check &
+            for _ in $(seq 1 60); do grep -q '^done=1' "$TMPDIR/hcg-pack-demo.txt" 2>/dev/null && break; sleep 1; done
+            cat "$TMPDIR/hcg-pack-demo.txt" | tee "$OUT/demo-run-offline.txt"
+            grep -q '^state=Playing' "$OUT/demo-run-offline.txt"
+            grep -q '^advanced=yes' "$OUT/demo-run-offline.txt"
+          else
+            echo "sandbox-exec not available on this image: offline run not performed"
+          fi
+      - name: The ZIP Maker produced holds the same app
+        run: |
+          zip="$(find "$OUT/artifacts" -maxdepth 4 -name '*.zip' | head -1)"
+          mkdir -p "$RUNNER_TEMP/unzipped" && ditto -x -k "$zip" "$RUNNER_TEMP/unzipped"
+          diff -r animation-centre/Samples/OrbitalCommand.hcgpack "$(find "$RUNNER_TEMP/unzipped" -maxdepth 2 -name '*.app' | head -1)/Contents/Resources/OrbitalCommand.hcgpack"
+          shasum -a 256 "$zip" | tee "$OUT/demo-zip.sha256"
+      - name: Upload
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: hcg-pack-demo-built-by-maker
+          path: |
+            ${{ runner.temp }}/maker-out/artifacts
+            ${{ runner.temp }}/maker-out/screens
+            ${{ runner.temp }}/maker-out/*.txt
+            ${{ runner.temp }}/maker-out/*.json
+            ${{ runner.temp }}/maker-out/*.sha256
+          if-no-files-found: warn
+          retention-days: 14

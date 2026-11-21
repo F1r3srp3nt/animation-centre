@@ -117,7 +117,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
 
     /// Double-clicked .hcgpack folders (and files dropped on the Dock icon) are imported into the library.
     func application(_ application: NSApplication, open urls: [URL]) {
-        guard !Settings.isSelfTest else { return }
+        guard !AppSettings.isSelfTest else { return }
         MainActor.assumeIsolated {
             AppModel.shared.loadLibrary()
             AppModel.shared.importFiles(urls)

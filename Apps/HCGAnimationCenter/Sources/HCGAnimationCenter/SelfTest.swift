@@ -66,7 +66,7 @@ enum SelfTest {
         let cycles = Int(argument("--cycles", in: args) ?? "") ?? 20
         let root = FileManager.default.temporaryDirectory.appendingPathComponent("hcg-selftest-\(UUID().uuidString)", isDirectory: true)
         let paths = AppPaths(root: root)
-        Settings.defaults.removePersistentDomain(forName: Settings.suiteName)
+        AppSettings.defaults.removePersistentDomain(forName: AppSettings.suiteName)
         let model = AppModel(paths: paths)
         let env = environment()
         print("HCG Animation Center self-test \(AppInfo.version) — \(env.map { "\($0.key)=\($0.value)" }.sorted().joined(separator: " "))")
@@ -291,7 +291,7 @@ enum SelfTest {
     }
 
     static func desktop(_ model: AppModel, cycles: Int) async {
-        guard let item = model.selected else { return }
+        guard model.selected != nil else { return }
         let d = model.desktop
         let imagesBefore = desktopImages()
         let shotBefore = screenshot("desktop-before")

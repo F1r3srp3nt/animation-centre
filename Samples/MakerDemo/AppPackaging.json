@@ -1,0 +1,33 @@
+{
+  "schema": "hcg-app-packaging/1",
+  "description": "HCG animation pack integration (opt-in for this project): the files of ../OrbitalCommand.hcgpack are bundled unchanged in Contents/Resources/OrbitalCommand.hcgpack, and Resources/Info.plist names the pack and placement the app shows. No prebuild commands.",
+  "product": "HCGPackDemo",
+  "bundle": {
+    "displayName": "HCG Pack Demo",
+    "identifier": "com.hakmicapitalgroup.packdemo",
+    "infoPlist": "Resources/Info.plist",
+    "minimumMacOS": "14.0"
+  },
+  "resources": [
+    {
+      "source": "../OrbitalCommand.hcgpack/pack.json",
+      "destination": "Contents/Resources/OrbitalCommand.hcgpack/pack.json",
+      "required": true
+    },
+    {
+      "source": "../OrbitalCommand.hcgpack/preset.json",
+      "destination": "Contents/Resources/OrbitalCommand.hcgpack/preset.json",
+      "required": true
+    },
+    {
+      "source": "../OrbitalCommand.hcgpack/media.mp4",
+      "destination": "Contents/Resources/OrbitalCommand.hcgpack/media.mp4",
+      "required": true
+    },
+    {
+      "source": "../OrbitalCommand.hcgpack/poster.jpg",
+      "destination": "Contents/Resources/OrbitalCommand.hcgpack/poster.jpg",
+      "required": true
+    }
+  ]
+}

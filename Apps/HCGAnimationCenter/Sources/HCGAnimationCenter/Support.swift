@@ -26,7 +26,7 @@ struct AppPaths {
         if let override = ProcessInfo.processInfo.environment["HCG_ANIMATION_CENTER_HOME"], !override.isEmpty {
             return AppPaths(root: URL(fileURLWithPath: override, isDirectory: true))
         }
-        if Settings.isSelfTest {
+        if AppSettings.isSelfTest {
             // The self-test never touches the user's library or log.
             return AppPaths(root: FileManager.default.temporaryDirectory.appendingPathComponent("hcg-selftest-home", isDirectory: true))
         }
@@ -70,7 +70,7 @@ enum BundledResources {
 }
 
 /// User settings (UserDefaults).
-enum Settings {
+enum AppSettings {
     static let isSelfTest = CommandLine.arguments.contains("--self-test")
     static let suiteName = "com.hakmicapitalgroup.animationcenter.mac.selftest"
     /// The self-test uses its own settings domain.

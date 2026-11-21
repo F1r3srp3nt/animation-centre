@@ -45,11 +45,11 @@ final class AppModel: ObservableObject {
     let playhead = Playhead()
     @Published var editorOpen = true
 
-    @Published var keepPlaying: Bool { didSet { Settings.keepPlayingWhenEditorCloses = keepPlaying } }
-    @Published var resumeOnLaunch: Bool { didSet { Settings.defaults.set(resumeOnLaunch, forKey: Settings.Key.resumeOnLaunch) } }
+    @Published var keepPlaying: Bool { didSet { AppSettings.keepPlayingWhenEditorCloses = keepPlaying } }
+    @Published var resumeOnLaunch: Bool { didSet { AppSettings.defaults.set(resumeOnLaunch, forKey: AppSettings.Key.resumeOnLaunch) } }
     @Published var stillOnly: Bool {
         didSet {
-            Settings.defaults.set(stillOnly, forKey: Settings.Key.stillOnly)
+            AppSettings.defaults.set(stillOnly, forKey: AppSettings.Key.stillOnly)
             monitor.forceStill = stillOnly
         }
     }
@@ -58,16 +58,16 @@ final class AppModel: ObservableObject {
     private var cancellables: Set<AnyCancellable> = []
 
     init(paths: AppPaths = .standard) {
-        Settings.register()
+        AppSettings.register()
         paths.prepare()
         self.paths = paths
         let monitor = SystemMonitor()
         self.monitor = monitor
         desktop = DesktopPlayer(monitor: monitor)
         catalog = CatalogModel(root: paths.catalog)
-        keepPlaying = Settings.keepPlayingWhenEditorCloses
-        resumeOnLaunch = Settings.defaults.bool(forKey: Settings.Key.resumeOnLaunch)
-        stillOnly = Settings.defaults.bool(forKey: Settings.Key.stillOnly)
+        keepPlaying = AppSettings.keepPlayingWhenEditorCloses
+        resumeOnLaunch = AppSettings.defaults.bool(forKey: AppSettings.Key.resumeOnLaunch)
+        stillOnly = AppSettings.defaults.bool(forKey: AppSettings.Key.stillOnly)
         monitor.forceStill = stillOnly
         // Re-publish nested objects so menu bar and editor views update.
         desktop.objectWillChange.sink { [weak self] _ in self?.objectWillChange.send() }.store(in: &cancellables)
@@ -98,7 +98,7 @@ final class AppModel: ObservableObject {
 
     /// First launch: copy the bundled HCG Orbital Command pack into the library.
     func seedSampleIfNeeded() {
-        guard !Settings.defaults.bool(forKey: Settings.Key.seeded), let sample = BundledResources.samplePack,
+        guard !AppSettings.defaults.bool(forKey: AppSettings.Key.seeded), let sample = BundledResources.samplePack,
               let pack = try? AnimationPack.read(contentsOf: sample) else { return }
         let dest = paths.library.appendingPathComponent("\(pack.id).hcgpack", isDirectory: true)
         if !FileManager.default.fileExists(atPath: dest.path) {
@@ -110,7 +110,7 @@ final class AppModel: ObservableObject {
                 return
             }
         }
-        Settings.defaults.set(true, forKey: Settings.Key.seeded)
+        AppSettings.defaults.set(true, forKey: AppSettings.Key.seeded)
     }
 
     func addPackFolder(_ source: URL, select: Bool = true) throws {
@@ -260,17 +260,17 @@ final class AppModel: ObservableObject {
             return
         }
         desktop.apply(pack: item.pack, folder: item.folder)
-        Settings.defaults.set(item.id, forKey: Settings.Key.appliedPack)
+        AppSettings.defaults.set(item.id, forKey: AppSettings.Key.appliedPack)
         banner = Banner(text: "\(item.pack.name) is on your desktop. Control it from the menu bar.", isError: false)
     }
 
     func stopDesktop() {
         desktop.stop()
-        Settings.defaults.removeObject(forKey: Settings.Key.appliedPack)
+        AppSettings.defaults.removeObject(forKey: AppSettings.Key.appliedPack)
     }
 
     func resumeLastAppliedIfWanted() {
-        guard resumeOnLaunch, let id = Settings.defaults.string(forKey: Settings.Key.appliedPack),
+        guard resumeOnLaunch, let id = AppSettings.defaults.string(forKey: AppSettings.Key.appliedPack),
               let item = items.first(where: { $0.id == id }) else { return }
         guard (try? item.pack.verify(in: item.folder)) != nil else { return }
         desktop.apply(pack: item.pack, folder: item.folder)

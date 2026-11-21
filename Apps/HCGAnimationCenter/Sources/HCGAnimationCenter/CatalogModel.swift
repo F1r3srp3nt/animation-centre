@@ -16,7 +16,7 @@ final class CatalogModel: ObservableObject {
     weak var library: AppModel?
 
     @Published var catalogURLString: String {
-        didSet { Settings.defaults.set(catalogURLString, forKey: Settings.Key.catalogURL) }
+        didSet { AppSettings.defaults.set(catalogURLString, forKey: AppSettings.Key.catalogURL) }
     }
     @Published private(set) var snapshot: CatalogStore.Snapshot?
     @Published private(set) var refreshError: String?
@@ -28,7 +28,7 @@ final class CatalogModel: ObservableObject {
 
     init(root: URL, transport: CatalogTransport = URLSessionTransport()) {
         store = CatalogStore(root: root, transport: transport)
-        catalogURLString = Settings.defaults.string(forKey: Settings.Key.catalogURL)
+        catalogURLString = AppSettings.defaults.string(forKey: AppSettings.Key.catalogURL)
             ?? BundledResources.localCatalog?.absoluteString ?? ""
         snapshot = store.snapshot
         updateCached()
