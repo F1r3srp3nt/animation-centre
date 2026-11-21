@@ -260,6 +260,7 @@ enum SelfTest {
             record("Placement \(placement.id.title) renders", playing && advanced && layoutOK && view.hasStillImage,
                    "\(placement.preset.scaling.rawValue) at \(placement.preset.speed)×: \(view.state.label), time \(String(format: "%.2f→%.2f", t0, t1)), layout \(Int(mf.width))x\(Int(mf.height)) (C core \(Int(expected.width))x\(Int(expected.height)))")
             view.unload()
+            window.orderOut(nil)
             window.close()
         }
         // Play once holds the last frame.
@@ -284,6 +285,7 @@ enum SelfTest {
         let stillShown = await wait(3) { v2.hasStillImage }
         record("Unplayable video shows the still", failed && stillShown, v2.state.label, simulated: true)
         v2.unload()
+        w2.orderOut(nil)
         w2.close()
     }
 
@@ -317,6 +319,7 @@ enum SelfTest {
         guard model.selected != nil else { return }
         let d = model.desktop
         let imagesBefore = desktopImages()
+        await sleep(1.5) // let earlier test windows finish closing before the baseline screenshot
         let shotBefore = screenshot("desktop-before")
 
         if NSWorkspace.shared.accessibilityDisplayShouldReduceMotion {

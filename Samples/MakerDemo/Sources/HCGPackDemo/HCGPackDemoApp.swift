@@ -66,6 +66,15 @@ final class DemoModel: ObservableObject {
     }
 
     func start() async {
+        if selfCheck {
+            // Never hang a CI step: report and quit after 45 s whatever happens.
+            DispatchQueue.main.asyncAfter(deadline: .now() + 45) { [weak self] in
+                guard let self else { return }
+                self.note("done=timeout")
+                self.writeReport()
+                exit(3)
+            }
+        }
         note("app=HCG Pack Demo \(Bundle.main.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String ?? "?")")
         note("bundle=\(Bundle.main.bundlePath)")
         guard let located = locatePack() else {
@@ -135,12 +144,15 @@ final class DemoModel: ObservableObject {
             let p = NSPoint(x: trailing ? frame.maxX - 14 : frame.midX, y: content.bounds.height - frame.midY)
             let hit = content.hitTest(content.convert(p, from: nil))
             note("hit=\(hit.map { String(describing: type(of: $0)) } ?? "nil") isBackground=\(hit is PackPlayerView)")
-            for type in [NSEvent.EventType.leftMouseDown, .leftMouseUp] {
-                if let e = NSEvent.mouseEvent(with: type, location: p, modifierFlags: [], timestamp: ProcessInfo.processInfo.systemUptime,
-                                              windowNumber: window.windowNumber, context: nil, eventNumber: 0, clickCount: 1, pressure: 1) {
-                    window.sendEvent(e)
-                }
+            func event(_ type: NSEvent.EventType) -> NSEvent? {
+                NSEvent.mouseEvent(with: type, location: p, modifierFlags: [], timestamp: ProcessInfo.processInfo.systemUptime,
+                                   windowNumber: window.windowNumber, context: nil, eventNumber: 0, clickCount: 1, pressure: 1)
             }
+            // A control's mouseDown runs AppKit's tracking loop, which reads the next mouse event from the queue:
+            // queue the mouseUp first so the loop finds it (as with a real click).
+            guard let down = event(.leftMouseDown), let up = event(.leftMouseUp) else { return }
+            NSApp.postEvent(up, atStart: false)
+            window.sendEvent(down)
         }
         let before = launches
         click(buttonFrame)
@@ -157,7 +169,7 @@ final class DemoModel: ObservableObject {
         print(line)
     }
 
-    private func writeReport() {
+    func writeReport() {
         let url = URL(fileURLWithPath: NSTemporaryDirectory()).appendingPathComponent("hcg-pack-demo.txt")
         try? (report.joined(separator: "\n") + "\n").write(to: url, atomically: true, encoding: .utf8)
     }
