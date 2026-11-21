@@ -1,0 +1,17 @@
+app=HCG Pack Demo 0.1.0
+bundle=HCG Pack Demo.app
+pack.path=Contents/Resources/OrbitalCommand.hcgpack
+pack=loaded id=4F1C9A3E-2B7D-4E61-9C05-0D8A7B3E5F21 name=HCG Orbital Command
+verify=ok media=media.mp4 sha256=32307504e32bd4263f2e86cbbd472c30f781b3cdeccc3d5daba812fb4649650b bytes=3319168
+placement=app-background scaling=crop
+network=not-used (reads Contents/Resources only)
+simulateFailure=false
+reduceMotion.system=true ignoredForThisRun=false
+state=Still frame — Reduce Motion
+still=yes
+videoOnScreen=no
+hit=AppKitWindowHostingView<ModifiedContent<AnyView, RootModifier>> isBackground=false
+click=Launch Mission launches=0->1 works=yes
+hit=AppKitWindowHostingView<ModifiedContent<AnyView, RootModifier>> isBackground=false
+toggle=Animate background true->false works=yes state=Still frame — Reduce Motion
+done=1

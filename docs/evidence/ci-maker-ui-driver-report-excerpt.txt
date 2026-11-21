@@ -1,0 +1,31 @@
+PASS  Imported folder animation-centre
+PASS  Recognized as Swift project (Swift Package Manager; support Supported)
+PASS  Several packages: none selected automatically
+PASS  Package Samples/MakerDemo/Package.swift offered
+PASS  Evaluation offered on this Mac
+PASS  Evaluation refused before trust is confirmed
+PASS  Package.swift evaluated
+PASS  Product HCGPackDemo available
+PASS  Next enabled after choosing the product
+PASS  Configure step shows the Swift app options
+Contract adds: Contents/Resources/OrbitalCommand.hcgpack/pack.json  ←  ../OrbitalCommand.hcgpack/pack.json
+Contract adds: Contents/Resources/OrbitalCommand.hcgpack/preset.json  ←  ../OrbitalCommand.hcgpack/preset.json
+Contract adds: Contents/Resources/OrbitalCommand.hcgpack/media.mp4  ←  ../OrbitalCommand.hcgpack/media.mp4
+Contract adds: Contents/Resources/OrbitalCommand.hcgpack/poster.jpg  ←  ../OrbitalCommand.hcgpack/poster.jpg
+Contract adds: Contents/Info.plist  ←  template Resources/Info.plist
+PASS  Configuration valid
+PASS  Package step
+PASS  No format is a milestone placeholder
+PASS  Format macOS application bundle (.app) available and selected
+PASS  Format Portable ZIP archive available and selected
+PASS  Build refused before trust is confirmed
+PASS  Build Succeeded: 2 artifact(s) generated and verified · 0 warning(s). Ad-hoc signed only: not Developer ID signed or notarized. Installation and launch are tested only when you run Test install.
+    [Passed] Info.plist: com.hakmicapitalgroup.packdemo 0.1.0 (1), display name HCG Pack Demo
+    [Passed] Executable format: MachO ARM64 executable for macOS.
+    [Passed] Executable permission: Executable bit is set.
+    [Passed] Deployment target: LSMinimumSystemVersion 14.0; executable built for macOS 14.0+.
+    [Passed] Contract resources: Contents/Resources/OrbitalCommand.hcgpack/pack.json, Contents/Resources/OrbitalCommand.hcgpack/preset.json, Contents/Resources/OrbitalCommand.hcgpack/media.mp4, Contents/Resources/OrbitalCommand.hcgpack/poster.jpg
+    [PassedWithWarnings] Code signature: codesign --verify --strict passed. Ad-hoc signature only: NOT signed with a Developer ID and NOT notarized, so other Macs show a Gatekeeper warning (right-click → Open).
+    [Passed] Archive integrity: 8 files
+    [Passed] Executable permission: HCG Pack Demo.app/Contents/MacOS/HCGPackDemo recorded as 755
+    [Passed] Extract round trip: Extracted with ditto -x -k; the .app's signature still verifies (codesign --verify --strict).

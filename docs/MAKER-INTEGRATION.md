@@ -84,7 +84,7 @@ dotnet maker/tools/ui-driver/bin/Release/net10.0/hcg-ui-driver.dll --source "$PW
 
 ## Build evidence
 
-See [VERIFICATION.md](VERIFICATION.md#maker-built-demo) for the CI run, the logs' key lines and the artifact
+See [VERIFICATION.md](VERIFICATION.md#maker-built-demo-job-maker-demo) for the CI run, the logs' key lines and the artifact
 (`hcg-pack-demo-built-by-maker`).
 
 ## Possible Maker improvement (not required, not done)
