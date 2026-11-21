@@ -1,0 +1,103 @@
+# HCG Animation Center — CI
+#
+#   format-linux   HCGAnimationKit format tests on Linux (proves the format has no Apple dependency) + Python validator
+#   macos          kit tests on macOS, the studio app (.app, universal), its self-tests in a real GUI session,
+#                  the sample pack, exports, catalog; uploads the app and evidence
+#   maker-demo     builds Samples/MakerDemo THROUGH HCG Executable Maker's real New Build wizard (headless driver),
+#                  then launches the finished app and checks it contains and plays the bundled pack
+#
+# Hosted macOS runners are virtual machines, not the MacBook Pro M4 Max: hardware-only checks (real sleep/wake, real
+# display hot-plug, Low Power Mode, macOS 27) are in docs/MAC-HARDWARE-CHECKLIST.md.
+name: CI
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  format-linux:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - name: Swift version
+        run: swift --version
+      - name: Vendored files unchanged
+        run: scripts/check-vendored.sh
+      - name: HCGAnimationKit tests (Linux)
+        working-directory: Packages/HCGAnimationKit
+        run: swift test
+      - name: hcgpack validates the sample pack and catalogs
+        working-directory: Packages/HCGAnimationKit
+        run: |
+          swift build -c release --product hcgpack
+          .build/release/hcgpack validate ../../Samples/OrbitalCommand.hcgpack
+          .build/release/hcgpack validate-catalog ../../catalog/catalog.json
+          .build/release/hcgpack validate-catalog ../../Samples/catalog.local.json
+      - name: Python validator (independent implementation, JSON Schemas)
+        run: |
+          pip install --quiet "jsonschema>=4.18"
+          python3 scripts/validate_pack.py Samples/OrbitalCommand.hcgpack --catalog catalog/catalog.json --catalog Samples/catalog.local.json
+
+  macos:
+    runs-on: macos-latest
+    timeout-minutes: 60
+    env:
+      OUT: ${{ github.workspace }}/out
+    steps:
+      - uses: actions/checkout@v4
+      - name: Host
+        run: |
+          sw_vers; uname -m; sysctl -n machdep.cpu.brand_string || true
+          xcode-select -p; swift --version
+          system_profiler SPDisplaysDataType | sed -n '1,40p' || true
+          pmset -g || true
+          mkdir -p "$OUT"
+      - name: HCGAnimationKit build (incl. the AppKit player) and tests (macOS, CryptoKit vs portable SHA-256)
+        working-directory: Packages/HCGAnimationKit
+        run: |
+          swift build
+          swift test
+      - name: Build HCG Animation Center.app (universal)
+        run: scripts/build-app.sh --universal --output "$OUT"
+      - name: Inspect the app
+        run: |
+          APP="$OUT/HCG Animation Center.app"
+          plutil -p "$APP/Contents/Info.plist"
+          lipo -archs "$APP/Contents/MacOS/HCGAnimationCenter"
+          vtool -show-build "$APP/Contents/MacOS/HCGAnimationCenter" | grep -E 'platform|minos|sdk'
+          codesign --verify --strict --deep --verbose=2 "$APP"
+          ls -la "$APP/Contents/Resources"
+      - name: Self-test — library import, desktop apply/stop x20, displays, sleep/wake, policies, restore
+        run: |
+          APP="$OUT/HCG Animation Center.app"
+          "$APP/Contents/MacOS/HCGAnimationCenter" --self-test --report "$OUT/self-test.json" --screenshots "$OUT/screens"
+          cat "$OUT/self-test.json"
+      - name: Launch normally (editor window), screenshot, quit
+        run: |
+          APP="$OUT/HCG Animation Center.app"
+          open -n "$APP" --args --open-sample
+          sleep 12
+          pgrep -f "HCG Animation Center.app/Contents/MacOS/HCGAnimationCenter"
+          screencapture -x "$OUT/screens/editor-launch.png"
+          osascript -e 'tell application id "com.hakmicapitalgroup.animationcenter.mac" to quit' || pkill -f HCGAnimationCenter
+      - name: Package for download (zip with ditto)
+        run: |
+          cd "$OUT" && ditto -c -k --sequesterRsrc --keepParent "HCG Animation Center.app" "HCG-Animation-Center-mac.zip"
+          shasum -a 256 HCG-Animation-Center-mac.zip | tee HCG-Animation-Center-mac.zip.sha256
+      - name: Upload
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: hcg-animation-center-mac
+          path: |
+            ${{ github.workspace }}/out/HCG-Animation-Center-mac.zip
+            ${{ github.workspace }}/out/HCG-Animation-Center-mac.zip.sha256
+            ${{ github.workspace }}/out/self-test.json
+            ${{ github.workspace }}/out/screens
+          if-no-files-found: warn
+          retention-days: 14
