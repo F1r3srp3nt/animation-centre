@@ -29,9 +29,11 @@ enum SelfTest {
     }
 
     static var checks: [Check] = []
+    static var extraEnvironment: [String: String] = [:]
     static var screenshotDir: URL?
 
     static func record(_ name: String, _ ok: Bool, _ detail: String, simulated: Bool = false) {
+        section = name
         checks.append(Check(name: name, status: ok ? "pass" : "fail", detail: detail, simulated: simulated))
         print("\(ok ? "PASS" : "FAIL")\(simulated ? " (simulated)" : "")  \(name) — \(detail)")
     }
@@ -59,8 +61,19 @@ enum SelfTest {
 
     // MARK: Run
 
+    nonisolated(unsafe) static var section = "start"
+
     static func run(arguments args: [String]) async -> Int32 {
+        setvbuf(stdout, nil, _IOLBF, 0)
         let report = argument("--report", in: args).map { URL(fileURLWithPath: $0) }
+        let limit = Double(argument("--time-limit", in: args) ?? "") ?? 900
+        // Watchdog: never hang CI or the user's terminal.
+        DispatchQueue.global().asyncAfter(deadline: .now() + limit) {
+            let line = "SELF-TEST TIMED OUT after \(Int(limit)) s in section: \(SelfTest.section)"
+            print(line)
+            if let report { try? Data((#"{"timedOut": true, "section": ""# + SelfTest.section + "\"}\n").utf8).write(to: report) }
+            exit(3)
+        }
         screenshotDir = argument("--screenshots", in: args).map { URL(fileURLWithPath: $0, isDirectory: true) }
         if let d = screenshotDir { try? FileManager.default.createDirectory(at: d, withIntermediateDirectories: true) }
         let cycles = Int(argument("--cycles", in: args) ?? "") ?? 20
@@ -71,16 +84,21 @@ enum SelfTest {
         let env = environment()
         print("HCG Animation Center self-test \(AppInfo.version) — \(env.map { "\($0.key)=\($0.value)" }.sorted().joined(separator: " "))")
 
+        section = "library and import"; print("== \(section)")
         await libraryAndImport(model, paths: paths)
+        section = "placements"; print("== \(section)")
         await placements(model)
+        section = "desktop"; print("== \(section)")
         await desktop(model, cycles: cycles)
+        section = "editor lifecycle"; print("== \(section)")
         editorLifecycle()
+        section = "catalog"; print("== \(section)")
         await catalog(paths: paths)
 
         let failed = checks.filter { $0.status == "fail" }.count
         let json: JSONValue = [
             "app": .string(AppInfo.version),
-            "environment": .object(env.mapValues { .string($0) }),
+            "environment": .object(env.merging(extraEnvironment) { a, _ in a }.mapValues { .string($0) }),
             "summary": ["passed": .number(Double(checks.filter { $0.status == "pass" }.count)),
                         "failed": .number(Double(failed)),
                         "skipped": .number(Double(checks.filter { $0.status == "skip" }.count))],
@@ -290,11 +308,26 @@ enum SelfTest {
         return !a.isEmpty && a.count == b.count && zip(a, b).allSatisfy { $1 > $0 + 0.2 || $1 < $0 - 1 } // a loop may wrap
     }
 
+    /// The Reduce Motion input used for the playback checks. CI runners have Reduce Motion ON; then the first check is
+    /// a real one (the still must show), and the remaining playback checks run with the app's Reduce Motion input
+    /// overridden to off — reported in the environment as "reduceMotionOverride".
+    static var baselineReduceMotion: Bool?
+
     static func desktop(_ model: AppModel, cycles: Int) async {
         guard model.selected != nil else { return }
         let d = model.desktop
         let imagesBefore = desktopImages()
         let shotBefore = screenshot("desktop-before")
+
+        if NSWorkspace.shared.accessibilityDisplayShouldReduceMotion {
+            model.applySelectedToDesktop()
+            let still = await wait(8) { d.status == .still(reason: "Reduce Motion") && d.windows.values.allSatisfy { $0.playerView.hasStillImage && !$0.playerView.isVideoOnScreen } }
+            record("System Reduce Motion is ON here: the desktop shows the still frame", still, d.status.label)
+            model.stopDesktop()
+            baselineReduceMotion = false
+            d.monitor.overrideReduceMotion = false
+            extraEnvironment["reduceMotionOverride"] = "system Reduce Motion is on; playback checks below override the app's input to off"
+        }
 
         model.applySelectedToDesktop()
         let screens = NSScreen.screens
@@ -371,7 +404,7 @@ enum SelfTest {
         // Reduce Motion / Low Power / thermal.
         d.monitor.overrideReduceMotion = true
         let rm = await wait(3) { d.status == .still(reason: "Reduce Motion") && d.windows.values.allSatisfy { !$0.playerView.isVideoOnScreen && $0.playerView.hasStillImage } }
-        d.monitor.overrideReduceMotion = nil
+        d.monitor.overrideReduceMotion = baselineReduceMotion
         d.monitor.overrideLowPower = true
         let lp = await wait(3) { d.status == .still(reason: "Low Power Mode") }
         let savedPlacement = model.placement
@@ -491,7 +524,10 @@ enum SelfTest {
         p.executableURL = URL(fileURLWithPath: "/usr/sbin/screencapture")
         p.arguments = ["-x", "-m", url.path]
         do { try p.run() } catch { return nil }
-        p.waitUntilExit()
+        // Without Screen Recording permission screencapture may wait for a prompt: give up after 10 s.
+        let deadline = Date().addingTimeInterval(10)
+        while p.isRunning && Date() < deadline { usleep(50_000) }
+        if p.isRunning { p.terminate(); print("screencapture did not finish (no Screen Recording permission?)"); return nil }
         guard p.terminationStatus == 0, let src = CGImageSourceCreateWithURL(url as CFURL, nil) else { return nil }
         return CGImageSourceCreateImageAtIndex(src, 0, nil)
     }

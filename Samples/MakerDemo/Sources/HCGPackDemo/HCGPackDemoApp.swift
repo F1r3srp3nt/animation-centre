@@ -48,6 +48,9 @@ final class DemoModel: ObservableObject {
 
     let simulateFailure = CommandLine.arguments.contains("--simulate-playback-failure")
     let selfCheck = CommandLine.arguments.contains("--self-check")
+    /// Test hook: play even if the system's Reduce Motion is on (CI runners have it on).
+    let ignoreReduceMotion = CommandLine.arguments.contains("--ignore-reduce-motion")
+    var reduceMotion: Bool { NSWorkspace.shared.accessibilityDisplayShouldReduceMotion && !ignoreReduceMotion }
     weak var playerView: PackPlayerView?
     var buttonFrame: CGRect = .zero   // window coordinates (SwiftUI global space, top-left origin)
     var toggleFrame: CGRect = .zero
@@ -86,6 +89,7 @@ final class DemoModel: ObservableObject {
         }
         note("network=not-used (reads Contents/Resources only)")
         note("simulateFailure=\(simulateFailure)")
+        note("reduceMotion.system=\(NSWorkspace.shared.accessibilityDisplayShouldReduceMotion) ignoredForThisRun=\(ignoreReduceMotion)")
         await observePlayback()
     }
 
@@ -125,9 +129,10 @@ final class DemoModel: ObservableObject {
         window.makeKeyAndOrderFront(nil)
         NSApp.activate(ignoringOtherApps: true)
         try? await Task.sleep(nanoseconds: 300_000_000)
-        func click(_ frame: CGRect) {
+        func click(_ frame: CGRect, trailing: Bool = false) {
             // SwiftUI global frames are top-left based inside the window's content; AppKit window points are bottom-left.
-            let p = NSPoint(x: frame.midX, y: content.bounds.height - frame.midY)
+            // A switch toggles only on the control itself, which sits at the trailing edge of its row.
+            let p = NSPoint(x: trailing ? frame.maxX - 14 : frame.midX, y: content.bounds.height - frame.midY)
             let hit = content.hitTest(content.convert(p, from: nil))
             note("hit=\(hit.map { String(describing: type(of: $0)) } ?? "nil") isBackground=\(hit is PackPlayerView)")
             for type in [NSEvent.EventType.leftMouseDown, .leftMouseUp] {
@@ -142,7 +147,7 @@ final class DemoModel: ObservableObject {
         try? await Task.sleep(nanoseconds: 400_000_000)
         note("click=Launch Mission launches=\(before)->\(launches) works=\(launches == before + 1 ? "yes" : "no")")
         let animateBefore = animate
-        click(toggleFrame)
+        click(toggleFrame, trailing: true)
         try? await Task.sleep(nanoseconds: 600_000_000)
         note("toggle=Animate background \(animateBefore)->\(animate) works=\(animate != animateBefore ? "yes" : "no") state=\(playerState.label)")
     }
@@ -223,15 +228,12 @@ struct BackgroundPlayer: NSViewRepresentable {
         v.stillReason = "Animation off"
         v.onStateChange = { [weak model] s in DispatchQueue.main.async { model?.playerState = s } }
         model.playerView = v
-        if NSWorkspace.shared.accessibilityDisplayShouldReduceMotion {
-            v.stillReason = "Reduce Motion"
-        }
         return v
     }
 
     func updateNSView(_ v: PackPlayerView, context: Context) {
         if v.preset != preset || v.folder != folder { v.load(preset: preset, folder: folder) }
-        let reduceMotion = NSWorkspace.shared.accessibilityDisplayShouldReduceMotion
-        v.display = playing && !reduceMotion ? .playing : .still
+        v.stillReason = model.reduceMotion ? "Reduce Motion" : "Animation off"
+        v.display = playing && !model.reduceMotion ? .playing : .still
     }
 }

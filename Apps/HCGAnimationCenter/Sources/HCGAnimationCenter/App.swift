@@ -9,6 +9,9 @@
 //    --self-test [--report file.json] [--screenshots dir]   run the desktop-player checks and exit (CI, hardware check)
 //    --open-sample                                          select the HCG Orbital Command sample on launch
 //    --no-resume                                            do not resume the last applied animation
+//    --apply-sample                                         apply the sample pack to the desktop on launch
+//    --no-editor                                            start in the menu bar only
+//    --ignore-reduce-motion                                 test hook: play even if Reduce Motion is on
 //
 
 import AppKit
@@ -73,8 +76,23 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
            let id = try? AnimationPack.read(contentsOf: sample).id, model.items.contains(where: { $0.id == id }) {
             model.selectedID = id
         }
-        if !args.contains("--no-resume") { model.resumeLastAppliedIfWanted() }
-        showEditor()
+        if args.contains("--ignore-reduce-motion") {
+            // Test hook (CI runners have Reduce Motion on): treat Reduce Motion as off.
+            model.monitor.overrideReduceMotion = false
+            EventLog.shared.log("test hook: Reduce Motion input overridden to off")
+        }
+        if args.contains("--apply-sample"), let sample = BundledResources.samplePack,
+           let id = try? AnimationPack.read(contentsOf: sample).id, model.items.contains(where: { $0.id == id }) {
+            model.selectedID = id
+            model.applySelectedToDesktop()
+        } else if !args.contains("--no-resume") {
+            model.resumeLastAppliedIfWanted()
+        }
+        if !args.contains("--no-editor") {
+            showEditor()
+        } else {
+            NSApp.setActivationPolicy(.accessory)
+        }
     }
 
     @MainActor

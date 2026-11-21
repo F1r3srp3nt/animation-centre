@@ -38,6 +38,8 @@ jobs:
           .build/release/hcgpack validate ../../Samples/OrbitalCommand.hcgpack
           .build/release/hcgpack validate-catalog ../../catalog/catalog.json
           .build/release/hcgpack validate-catalog ../../Samples/catalog.local.json
+      - name: Compatibility table in the docs matches the data the app shows
+        run: scripts/check-compatibility-doc.sh
       - name: Python validator (independent implementation, JSON Schemas)
         run: |
           pip install --quiet "jsonschema>=4.18"
@@ -56,6 +58,9 @@ jobs:
           xcode-select -p; swift --version
           system_profiler SPDisplaysDataType | sed -n '1,40p' || true
           pmset -g || true
+          echo "Reduce Motion before: $(defaults read com.apple.universalaccess reduceMotion 2>&1)"
+          defaults write com.apple.universalaccess reduceMotion -bool false 2>&1 || echo "(cannot change Reduce Motion on this image)"
+          echo "Reduce Motion after: $(defaults read com.apple.universalaccess reduceMotion 2>&1)"
           mkdir -p "$OUT"
       - name: HCGAnimationKit build (incl. the AppKit player) and tests (macOS, CryptoKit vs portable SHA-256)
         working-directory: Packages/HCGAnimationKit
@@ -73,10 +78,34 @@ jobs:
           codesign --verify --strict --deep --verbose=2 "$APP"
           ls -la "$APP/Contents/Resources"
       - name: Self-test — library import, desktop apply/stop x20, displays, sleep/wake, policies, restore
+        timeout-minutes: 20
         run: |
           APP="$OUT/HCG Animation Center.app"
           "$APP/Contents/MacOS/HCGAnimationCenter" --self-test --report "$OUT/self-test.json" --screenshots "$OUT/screens"
           cat "$OUT/self-test.json"
+      - name: Desktop seen from outside the app — screenshots before, while playing, after quit (restore)
+        run: |
+          APP="$OUT/HCG Animation Center.app"
+          mkdir -p "$OUT/screens"
+          osascript -e 'tell application "System Events" to keystroke "h" using {command down, option down}' 2>/dev/null || true
+          sleep 2
+          screencapture -x -m "$OUT/screens/shell-1-before.png"
+          defaults read com.apple.universalaccess reduceMotion 2>/dev/null || true
+          HCG_ANIMATION_CENTER_HOME="$RUNNER_TEMP/hcg-home" open -n "$APP" --args --apply-sample --no-editor --ignore-reduce-motion
+          sleep 10
+          screencapture -x -m "$OUT/screens/shell-2-playing.png"
+          sleep 1
+          screencapture -x -m "$OUT/screens/shell-3-playing.png"
+          osascript -e 'tell application id "com.hakmicapitalgroup.animationcenter.mac" to quit' || pkill -f "HCG Animation Center.app/Contents/MacOS/HCGAnimationCenter"
+          sleep 3
+          ! pgrep -f "HCG Animation Center.app/Contents/MacOS/HCGAnimationCenter"
+          screencapture -x -m "$OUT/screens/shell-4-after-quit.png"
+          cat "$RUNNER_TEMP/hcg-home/Logs/events.log" || true
+          v=$(python3 scripts/screen_diff.py "$OUT/screens/shell-1-before.png" "$OUT/screens/shell-2-playing.png")
+          m=$(python3 scripts/screen_diff.py "$OUT/screens/shell-2-playing.png" "$OUT/screens/shell-3-playing.png")
+          r=$(python3 scripts/screen_diff.py "$OUT/screens/shell-1-before.png" "$OUT/screens/shell-4-after-quit.png")
+          echo "differs from the normal desktop while playing: $v · changes between frames 1 s apart: $m · after quit vs before: $r"
+          python3 -c "import sys; v,m,r=map(float,sys.argv[1:]); sys.exit(0 if v>0.05 and m>0.002 and r<0.02 else 1)" "$v" "$m" "$r"
       - name: Launch normally (editor window), screenshot, quit
         run: |
           APP="$OUT/HCG Animation Center.app"
@@ -157,16 +186,25 @@ jobs:
             for _ in $(seq 1 60); do grep -q '^done=1' "$report" 2>/dev/null && break; sleep 1; done
             cat "$report"
           }
-          echo "--- normal run"; run | tee "$OUT/demo-run.txt"
-          grep -q '^pack=loaded' "$OUT/demo-run.txt"
-          grep -q '^verify=ok' "$OUT/demo-run.txt"
+          echo "--- 1. as the user would run it (this runner's system Reduce Motion setting applies)"; run | tee "$OUT/demo-run-system.txt"
+          grep -q '^pack=loaded' "$OUT/demo-run-system.txt"
+          grep -q '^verify=ok' "$OUT/demo-run-system.txt"
+          grep -q '^click=Launch Mission .* works=yes' "$OUT/demo-run-system.txt"
+          if grep -q '^reduceMotion.system=true' "$OUT/demo-run-system.txt"; then
+            grep -q '^state=Still frame — Reduce Motion' "$OUT/demo-run-system.txt"
+            grep -q '^still=yes' "$OUT/demo-run-system.txt"
+            echo "Reduce Motion is ON on this runner: the still was shown (real system setting)"
+          else
+            grep -q '^state=Playing' "$OUT/demo-run-system.txt"
+          fi
+          echo "--- 2. playback (Reduce Motion ignored for this run)"; run --ignore-reduce-motion | tee "$OUT/demo-run.txt"
           grep -q '^state=Playing' "$OUT/demo-run.txt"
           grep -q '^advanced=yes' "$OUT/demo-run.txt"
           grep -q '^videoOnScreen=yes' "$OUT/demo-run.txt"
           grep -q '^click=Launch Mission .* works=yes' "$OUT/demo-run.txt"
           grep -q '^toggle=Animate background .* works=yes' "$OUT/demo-run.txt"
           ! grep -q 'isBackground=true' "$OUT/demo-run.txt"
-          echo "--- playback unavailable → still"; run --simulate-playback-failure | tee "$OUT/demo-run-still.txt"
+          echo "--- 3. playback unavailable → still"; run --ignore-reduce-motion --simulate-playback-failure | tee "$OUT/demo-run-still.txt"
           grep -q '^state=Still frame — playback unavailable' "$OUT/demo-run-still.txt"
           grep -q '^still=yes' "$OUT/demo-run-still.txt"
           grep -q '^click=Launch Mission .* works=yes' "$OUT/demo-run-still.txt"
@@ -175,7 +213,7 @@ jobs:
           rm -f "$TMPDIR/hcg-pack-demo.txt"
           if command -v sandbox-exec >/dev/null; then
             exe="$APP/Contents/MacOS/$(/usr/libexec/PlistBuddy -c 'Print :CFBundleExecutable' "$APP/Contents/Info.plist")"
-            sandbox-exec -p '(version 1)(allow default)(deny network*)' "$exe" --self-check &
+            sandbox-exec -p '(version 1)(allow default)(deny network*)' "$exe" --self-check --ignore-reduce-motion &
             for _ in $(seq 1 60); do grep -q '^done=1' "$TMPDIR/hcg-pack-demo.txt" 2>/dev/null && break; sleep 1; done
             cat "$TMPDIR/hcg-pack-demo.txt" | tee "$OUT/demo-run-offline.txt"
             grep -q '^state=Playing' "$OUT/demo-run-offline.txt"
